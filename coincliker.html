@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>고양이 집을 만들라</title>
+<style>
+  body {
+    background-color: white;
+    margin: 0;
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    user-select: none;
+  }
+
+  #startScreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    transition: opacity 1s ease;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(#B3E5FC 0%, #E3F2FD 42%, #FFFDE7 70%, #FFFFFF 100%);
+  }
+
+  #gameTitle {
+    font-size: 72px;
+    text-align: center;
+    margin-bottom: 0;
+    color: #FFC107;
+    position: relative;
+    z-index: 5;
+    -webkit-text-stroke: 3px black;
+    paint-order: stroke fill;
+    text-shadow: -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black, 2px 2px 0 black;
+  }
+
+  #subTitle {
+    font-size: 20px;
+    color: gray;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 5;
+    -webkit-text-stroke: 1.5px black;
+    paint-order: stroke fill;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+  }
+
+  #startRow { display: flex; justify-content: center; position: relative; z-index: 5; }
+
+  #startText {
+    cursor: pointer;
+    font-size: 48px;
+    border: 3px solid black;
+    padding: 20px 40px;
+    border-radius: 10px;
+    background-color: white;
+    margin: 0;
+  }
+  #startText:hover { background-color: #FFC107; }
+  .fade-out { opacity: 0; }
+
+  #sun, #gSun {
+    position: absolute;
+    top: 40px; right: 80px;
+    width: 90px; height: 90px;
+    background-color: #FFD54F;
+    border: 4px solid #F9A825;
+    border-radius: 50%;
+    z-index: 0;
+    box-shadow: 0 0 30px #FFE082;
+  }
+
+  .cloud {
+    position: absolute;
+    background-color: white;
+    border: 3px solid #90A4AE;
+    border-radius: 40px;
+    z-index: 0;
+  }
+  .cloud:before, .cloud:after {
+    content: "";
+    position: absolute;
+    background: white;
+    border: 3px solid #90A4AE;
+    border-radius: 50%;
+  }
+  #cloud1, #gCloud1 { left: 80px; top: 70px; width: 140px; height: 40px; }
+  #cloud1:before, #gCloud1:before { left: 18px; top: -28px; width: 50px; height: 50px; }
+  #cloud1:after, #gCloud1:after { left: 58px; top: -36px; width: 64px; height: 64px; }
+  #cloud2, #gCloud2 { right: 220px; top: 110px; width: 110px; height: 34px; }
+  #cloud2:before, #gCloud2:before { left: 12px; top: -22px; width: 40px; height: 40px; }
+  #cloud2:after, #gCloud2:after { left: 44px; top: -28px; width: 50px; height: 50px; }
+
+  #grass, #gameGrass {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 150px;
+    background-color: #4CAF50;
+    border-top: 3px solid #388E3C;
+    z-index: 1;
+  }
+
+  .flower { position: absolute; bottom: 158px; z-index: 3; }
+  .flower .petal { width: 14px; height: 14px; background: #F48FB1; border: 2px solid #AD1457; border-radius: 50%; }
+  .flower .center { position: absolute; left: 3px; top: 3px; width: 8px; height: 8px; background: #FFEB3B; border-radius: 50%; }
+  .bush {
+    position: absolute; bottom: 148px;
+    width: 70px; height: 40px;
+    background: #388E3C; border: 3px solid #1B5E20;
+    border-radius: 30px 30px 12px 12px; z-index: 2;
+  }
+  .bowl {
+    position: absolute; bottom: 152px;
+    width: 42px; height: 16px;
+    border: 3px solid #5D4037;
+    border-radius: 0 0 16px 16px; z-index: 3;
+  }
+  #foodBowl, #gFood { right: 560px; background: #FF7043; }
+  #waterBowl, #gWater { right: 510px; background: #4FC3F7; }
+  #yarn, #gYarn {
+    position: absolute; right: 600px; bottom: 152px;
+    width: 28px; height: 28px;
+    background: repeating-radial-gradient(circle, #E91E63 0 4px, #F48FB1 4px 7px);
+    border: 3px solid #880E4F; border-radius: 50%; z-index: 3;
+  }
+
+  #catTower {
+    position: absolute; left: 30px; bottom: 150px;
+    width: 320px; height: 700px; z-index: 2;
+  }
+  .ct-post {
+    position: absolute; width: 50px;
+    background: repeating-linear-gradient(180deg, #C4A574 0 12px, #B0895A 12px 16px);
+    border: 4px solid #6D4C41; border-radius: 8px;
+  }
+  .ct-post.left { left: 52px; bottom: 28px; height: 460px; }
+  .ct-post.right { right: 52px; bottom: 28px; height: 310px; }
+  .ct-platform {
+    position: absolute; height: 30px; background: #E8D5B5;
+    border: 4px solid #6D4C41; border-radius: 14px;
+  }
+  .ct-platform.low { left: 12px; bottom: 120px; width: 290px; }
+  .ct-platform.mid { left: 0; bottom: 280px; width: 210px; }
+  .ct-platform.high { left: 70px; bottom: 450px; width: 230px; }
+  .ct-house {
+    position: absolute; left: 88px; bottom: 480px;
+    width: 170px; height: 130px; background: #D7CCC8;
+    border: 4px solid #5D4037; border-radius: 10px 10px 6px 6px;
+  }
+  .ct-roof {
+    position: absolute; left: 74px; bottom: 600px;
+    border-left: 100px solid transparent;
+    border-right: 100px solid transparent;
+    border-bottom: 58px solid #8D6E63;
+  }
+  .ct-hole {
+    position: absolute; left: 48px; bottom: 18px;
+    width: 70px; height: 70px; background: #4E342E;
+    border-radius: 50%; border: 4px solid #3E2723;
+  }
+  .ct-base {
+    position: absolute; left: 16px; bottom: 0;
+    width: 280px; height: 36px; background: #A1887F;
+    border: 4px solid #5D4037; border-radius: 10px;
+  }
+  .ct-ball {
+    position: absolute; left: 18px; bottom: 300px;
+    width: 28px; height: 28px; background: #FFC107;
+    border: 4px solid black; border-radius: 50%;
+    animation: swing 1.6s ease-in-out infinite alternate;
+  }
+  .ct-string { position: absolute; left: 30px; bottom: 328px; width: 4px; height: 36px; background: black; }
+  @keyframes swing { from { transform: translateX(-4px); } to { transform: translateX(8px); } }
+
+  #hideHouse {
+    position: absolute; left: 380px; bottom: 150px;
+    width: 210px; height: 170px; z-index: 2;
+  }
+  .hh-body {
+    position: absolute; left: 10px; bottom: 0;
+    width: 190px; height: 120px; background: #F5E6C8;
+    border: 4px solid #6D4C41; border-radius: 90px 90px 18px 18px;
+  }
+  .hh-hood {
+    position: absolute; left: 22px; bottom: 88px;
+    width: 166px; height: 70px; background: #E0C090;
+    border: 4px solid #6D4C41; border-bottom: none; border-radius: 90px 90px 0 0;
+  }
+  .hh-door {
+    position: absolute; left: 62px; bottom: 8px;
+    width: 86px; height: 86px; background: #4E342E;
+    border: 4px solid #3E2723; border-radius: 50%;
+  }
+  .hh-cushion {
+    position: absolute; left: 40px; bottom: 4px;
+    width: 130px; height: 16px; background: #FFCC80;
+    border: 3px solid #EF6C00; border-radius: 10px;
+  }
+
+  #scratcher {
+    position: absolute; right: 40px; bottom: 150px;
+    width: 160px; height: 280px; z-index: 2;
+  }
+  .sc-base {
+    position: absolute; left: 10px; bottom: 0;
+    width: 140px; height: 28px; background: #A1887F;
+    border: 4px solid #5D4037; border-radius: 10px;
+  }
+  .sc-post {
+    position: absolute; left: 52px; bottom: 24px;
+    width: 56px; height: 210px;
+    background: repeating-linear-gradient(90deg, #D7B899 0 6px, #B08968 6px 8px);
+    border: 4px solid #6D4C41; border-radius: 8px;
+  }
+  .sc-top {
+    position: absolute; left: 28px; bottom: 228px;
+    width: 104px; height: 22px; background: #E8D5B5;
+    border: 4px solid #6D4C41; border-radius: 10px;
+  }
+  .sc-toy {
+    position: absolute; left: 66px; bottom: 250px;
+    width: 22px; height: 22px; background: #FF5252;
+    border: 3px solid black; border-radius: 50%;
+  }
+
+  #litterHouse {
+    position: absolute; right: 220px; bottom: 150px;
+    width: 180px; height: 130px; z-index: 2;
+  }
+  .lh-box {
+    position: absolute; left: 8px; bottom: 0;
+    width: 164px; height: 70px; background: #B0BEC5;
+    border: 4px solid #455A64; border-radius: 12px;
+  }
+  .lh-lid {
+    position: absolute; left: 8px; bottom: 62px;
+    width: 164px; height: 58px; background: #90A4AE;
+    border: 4px solid #455A64; border-bottom: none; border-radius: 18px 18px 8px 8px;
+  }
+  .lh-door {
+    position: absolute; left: 52px; bottom: 8px;
+    width: 76px; height: 76px; background: #37474F;
+    border: 4px solid #263238; border-radius: 16px 16px 8px 8px;
+  }
+  .lh-handle {
+    position: absolute; left: 72px; bottom: 108px;
+    width: 36px; height: 10px; background: #546E7A;
+    border: 3px solid #37474F; border-radius: 8px;
+  }
+
+  #cat, #gameCat {
+    position: absolute; right: 420px; bottom: 150px;
+    width: 150px; height: 130px; z-index: 3;
+  }
+  .cat-tail {
+    position: absolute; right: -10px; bottom: 28px;
+    width: 54px; height: 16px; background: #FF9800;
+    border: 3px solid #E65100; border-radius: 20px;
+    transform-origin: left center;
+    animation: tail 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes tail { from { transform: rotate(-20deg); } to { transform: rotate(10deg); } }
+  .cat-body {
+    position: absolute; left: 28px; bottom: 0;
+    width: 92px; height: 58px; background: #FF9800;
+    border: 3px solid #E65100; border-radius: 40px 40px 22px 22px;
+  }
+  .cat-head {
+    position: absolute; left: 18px; bottom: 42px;
+    width: 64px; height: 54px; background: #FF9800;
+    border: 3px solid #E65100; border-radius: 50%; z-index: 2;
+  }
+  .cat-ear {
+    position: absolute; bottom: 84px;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 22px solid #E65100;
+  }
+  .cat-ear.left { left: 22px; } .cat-ear.right { left: 54px; }
+  .cat-ear-in {
+    position: absolute; bottom: 88px;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 12px solid #FFCC80; z-index: 2;
+  }
+  .cat-ear-in.left { left: 27px; } .cat-ear-in.right { left: 59px; }
+  .cat-eye {
+    position: absolute; bottom: 64px;
+    width: 8px; height: 10px; background: #222; border-radius: 50%; z-index: 3;
+  }
+  .cat-eye.left { left: 34px; } .cat-eye.right { left: 52px; }
+  .cat-nose {
+    position: absolute; left: 45px; bottom: 54px;
+    width: 8px; height: 6px; background: #F48FB1; border-radius: 50%; z-index: 3;
+  }
+  .cat-stripe {
+    position: absolute; left: 58px; bottom: 28px;
+    width: 10px; height: 18px; background: #EF6C00; border-radius: 4px;
+  }
+
+  #gameScreen {
+    display: none;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(#E3F2FD 0%, #FFFDE7 70%, #FFFFFF 100%);
+  }
+
+  #shopBar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 10px 12px; background: white; border-bottom: 3px solid black;
+  }
+  #shopBar button {
+    border: 3px solid black; background: #FFF8E1;
+    border-radius: 10px; padding: 8px 10px; font-size: 14px; cursor: pointer;
+  }
+  #shopBar button:disabled { background: #E0E0E0; cursor: default; }
+  #hintText { margin-left: auto; font-size: 14px; }
+
+  #gTower, #gHide, #gScratch, #gLitter {
+    position: absolute;
+    bottom: 150px;
+    z-index: 4;
+    cursor: pointer;
+  }
+  #gTower { left: 30px; width: 320px; height: 680px; }
+  #gHide { left: 380px; width: 210px; height: 180px; }
+  #gScratch { right: 40px; width: 160px; height: 280px; }
+  #gLitter { right: 220px; width: 180px; height: 140px; }
+
+  .stack { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+  .final { display: none; position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; }
+  .final-on .stack { display: none; }
+  .final-on .final { display: block; }
+  .final-on .clickLabel { background: #C8E6C9; }
+
+  .piece {
+    position: absolute;
+    box-sizing: border-box;
+    animation: pop 0.16s ease-out;
+  }
+  @keyframes pop {
+    from { transform: scale(0.72); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .clickLabel {
+    position: absolute;
+    left: 50%;
+    bottom: -26px;
+    transform: translateX(-50%);
+    background: white;
+    border: 2px solid black;
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  .hidden-deco { display: none !important; }
+  #doneMsg {
+    display: none;
+    position: absolute;
+    top: 70px; left: 50%;
+    transform: translateX(-50%);
+    background: #FFC107;
+    border: 3px solid black;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 22px;
+    z-index: 12;
+  }
+
+  #huntBtn {
+    display: none;
+    position: absolute;
+    left: 92px;
+    bottom: 500px;
+    z-index: 15;
+    border: 3px solid black;
+    background: #FFC107;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  #huntBtn:hover { background: #FFECB3; }
+
+  #huntScreen {
+    display: none;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(#4FC3F7 0%, #81D4FA 40%, #E1F5FE 100%);
+    cursor: pointer;
+  }
+
+  #huntHud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 40;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.88);
+    border-bottom: 3px solid black;
+    font-size: 18px;
+    cursor: default;
+  }
+  #huntHud button {
+    margin-left: auto;
+    border: 3px solid black;
+    background: white;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  #huntScoreCenter {
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 41;
+    font-size: 42px;
+    font-weight: bold;
+    color: #222;
+    -webkit-text-stroke: 2px white;
+    paint-order: stroke fill;
+    text-shadow: 0 2px 0 #00000055;
+    pointer-events: none;
+  }
+
+  #huntStartWrap, #huntEndWrap {
+    position: absolute;
+    inset: 0;
+    z-index: 45;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(179, 229, 252, 0.25);
+    cursor: default;
+  }
+  #huntStartWrap.show, #huntEndWrap.show { display: flex; }
+  #huntStartBtn, #huntRetryBtn {
+    border: 3px solid black;
+    background: #FFC107;
+    border-radius: 12px;
+    padding: 18px 36px;
+    font-size: 36px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #huntStartBtn:hover, #huntRetryBtn:hover { background: #FFECB3; }
+  #huntEndBox {
+    background: white;
+    border: 3px solid black;
+    border-radius: 14px;
+    padding: 22px 28px;
+    text-align: center;
+  }
+  #huntEndBox p { margin: 8px 0; font-size: 22px; }
+  #huntRecord {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 42;
+    background: white;
+    border: 3px solid black;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: default;
+    text-align: right;
+    min-width: 150px;
+  }
+
+  .hunt-cloud {
+    position: absolute;
+    background: white;
+    border: 3px solid #90A4AE;
+    border-radius: 40px;
+    opacity: 0.9;
+  }
+
+  .gull {
+    position: absolute;
+    width: 96px;
+    height: 56px;
+    z-index: 8;
+  }
+  .gull-body {
+    position: absolute;
+    left: 24px; top: 20px;
+    width: 46px; height: 20px;
+    background: #FAFAFA;
+    border: 3px solid #424242;
+    border-radius: 16px;
+    pointer-events: none;
+  }
+  .gull-head {
+    position: absolute;
+    right: 10px; top: 14px;
+    width: 20px; height: 20px;
+    background: #FAFAFA;
+    border: 3px solid #424242;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .gull-beak {
+    position: absolute;
+    right: 2px; top: 20px;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 12px solid #FF9800;
+    pointer-events: none;
+  }
+  .gull-wing {
+    position: absolute;
+    left: 30px; top: 4px;
+    width: 34px; height: 16px;
+    background: #EEEEEE;
+    border: 3px solid #424242;
+    border-radius: 16px 16px 4px 4px;
+    transform-origin: bottom center;
+    animation: flap 0.22s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  .gull.flip { transform: scaleX(-1); }
+  .gull.fall {
+    animation: gullFall 0.75s ease-in forwards;
+    pointer-events: none;
+  }
+  @keyframes flap {
+    from { transform: rotate(-18deg); }
+    to { transform: rotate(22deg); }
+  }
+  @keyframes gullFall {
+    0% { opacity: 1; }
+    100% { transform: translateY(70vh) rotate(160deg); opacity: 0; }
+  }
+
+  #huntCat {
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    width: 240px;
+    height: 190px;
+    margin-left: -120px;
+    z-index: 36;
+    pointer-events: none;
+  }
+  .hc-body {
+    position: absolute;
+    left: 52px; bottom: 0;
+    width: 136px; height: 92px;
+    background: #FF9800;
+    border: 4px solid #E65100;
+    border-radius: 70px 70px 18px 18px;
+  }
+  .hc-head {
+    position: absolute;
+    left: 62px; bottom: 68px;
+    width: 116px; height: 92px;
+    background: #FF9800;
+    border: 4px solid #E65100;
+    border-radius: 58px 58px 40px 40px;
+    z-index: 2;
+  }
+  .hc-ear {
+    position: absolute;
+    bottom: 142px;
+    border-left: 22px solid transparent;
+    border-right: 22px solid transparent;
+    border-bottom: 38px solid #E65100;
+    z-index: 1;
+  }
+  .hc-ear.l { left: 58px; transform: rotate(-12deg); }
+  .hc-ear.r { left: 138px; transform: rotate(12deg); }
+  .hc-ear-in {
+    position: absolute;
+    bottom: 148px;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 20px solid #FFCC80;
+    z-index: 3;
+  }
+  .hc-ear-in.l { left: 68px; transform: rotate(-12deg); }
+  .hc-ear-in.r { left: 148px; transform: rotate(12deg); }
+  .hc-tail {
+    position: absolute;
+    left: 168px; bottom: 18px;
+    width: 64px; height: 18px;
+    background: #FF9800;
+    border: 4px solid #E65100;
+    border-radius: 20px;
+    transform-origin: left center;
+    animation: tail 1.2s ease-in-out infinite alternate;
+  }
+  .hc-stripe {
+    position: absolute;
+    left: 108px; bottom: 28px;
+    width: 16px; height: 28px;
+    background: #EF6C00;
+    border-radius: 6px;
+    z-index: 3;
+  }
+
+  .hc-paw {
+    position: absolute;
+    width: 108px;
+    height: 108px;
+    z-index: 8;
+    transform-origin: 50% 80%;
+  }
+  .hc-paw.left { left: -10px; bottom: 8px; }
+  .hc-paw.right { right: -10px; bottom: 8px; }
+  .hc-paw.left.punch { animation: nyanLeft 0.28s ease-out; }
+  .hc-paw.right.punch { animation: nyanRight 0.28s ease-out; }
+  @keyframes nyanLeft {
+    0% { transform: rotate(18deg) translate(0, 0); }
+    35% { transform: rotate(-28deg) translate(-18px, -92px); }
+    55% { transform: rotate(-8deg) translate(10px, -110px); }
+    100% { transform: rotate(18deg) translate(0, 0); }
+  }
+  @keyframes nyanRight {
+    0% { transform: rotate(-18deg) translate(0, 0); }
+    35% { transform: rotate(28deg) translate(18px, -92px); }
+    55% { transform: rotate(8deg) translate(-10px, -110px); }
+    100% { transform: rotate(-18deg) translate(0, 0); }
+  }
+
+  .paw-pad {
+    position: absolute;
+    left: 22px; bottom: 10px;
+    width: 68px; height: 58px;
+    background: #FF9800;
+    border: 4px solid #E65100;
+    border-radius: 50% 50% 46% 46%;
+  }
+  .paw-toe {
+    position: absolute;
+    width: 24px; height: 28px;
+    background: #FF9800;
+    border: 4px solid #E65100;
+    border-radius: 50%;
+  }
+  .paw-toe.t1 { left: 8px; top: 22px; }
+  .paw-toe.t2 { left: 30px; top: 6px; }
+  .paw-toe.t3 { left: 54px; top: 6px; }
+  .paw-toe.t4 { left: 76px; top: 22px; }
+  .paw-bean {
+    position: absolute;
+    left: 42px; bottom: 26px;
+    width: 20px; height: 14px;
+    background: #F48FB1;
+    border-radius: 50%;
+  }
+  .paw-claw {
+    position: absolute;
+    top: 2px;
+    width: 6px; height: 14px;
+    background: #FAFAFA;
+    border: 2px solid #9E9E9E;
+    border-radius: 3px 3px 6px 6px;
+    opacity: 0;
+  }
+  .hc-paw.punch .paw-claw { opacity: 1; }
+  .paw-claw.c1 { left: 16px; }
+  .paw-claw.c2 { left: 38px; }
+  .paw-claw.c3 { left: 62px; }
+  .paw-claw.c4 { left: 84px; }
+</style>
+</head>
+<body>
+
+  <div id="startScreen">
+    <div id="sun"></div>
+    <div class="cloud" id="cloud1"></div>
+    <div class="cloud" id="cloud2"></div>
+    <div>
+      <h1 id="gameTitle">고양이</h1>
+      <p id="subTitle">집을 만들라</p>
+      <div id="startRow"><h1 id="startText">게임 시작</h1></div>
+    </div>
+    <div id="catTower">
+      <div class="ct-roof"></div>
+      <div class="ct-house"><div class="ct-hole"></div></div>
+      <div class="ct-platform high"></div>
+      <div class="ct-platform mid"></div>
+      <div class="ct-platform low"></div>
+      <div class="ct-post left"></div>
+      <div class="ct-post right"></div>
+      <div class="ct-string"></div>
+      <div class="ct-ball"></div>
+      <div class="ct-base"></div>
+    </div>
+    <div id="hideHouse">
+      <div class="hh-hood"></div><div class="hh-body"></div><div class="hh-door"></div><div class="hh-cushion"></div>
+    </div>
+    <div id="cat">
+      <div class="cat-tail"></div>
+      <div class="cat-ear left"></div><div class="cat-ear right"></div>
+      <div class="cat-ear-in left"></div><div class="cat-ear-in right"></div>
+      <div class="cat-body"></div><div class="cat-stripe"></div><div class="cat-head"></div>
+      <div class="cat-eye left"></div><div class="cat-eye right"></div><div class="cat-nose"></div>
+    </div>
+    <div id="foodBowl" class="bowl"></div>
+    <div id="waterBowl" class="bowl"></div>
+    <div id="yarn"></div>
+    <div id="litterHouse">
+      <div class="lh-handle"></div><div class="lh-lid"></div><div class="lh-box"></div><div class="lh-door"></div>
+    </div>
+    <div id="scratcher">
+      <div class="sc-toy"></div><div class="sc-top"></div><div class="sc-post"></div><div class="sc-base"></div>
+    </div>
+    <div class="bush" style="left:200px"></div>
+    <div class="bush" style="right:170px"></div>
+    <div class="flower" style="left:250px"><div class="petal"></div><div class="center"></div></div>
+    <div class="flower" style="left:280px"><div class="petal" style="background:#CE93D8;border-color:#6A1B9A"></div><div class="center"></div></div>
+    <div id="grass"></div>
+  </div>
+
+  <div id="gameScreen">
+    <div id="shopBar">
+      <button data-place="tower">싸구려 캣타워</button>
+      <button data-place="hide">싸구려 숨숨집</button>
+      <button data-place="scratch">싸구려 스크래처</button>
+      <button data-place="litter">싸구려 화장실</button>
+      <span id="hintText">물건을 놓고, 클릭할 때마다 한 층씩 쌓여!</span>
+    </div>
+    <div id="doneMsg">집 완성! 시작 화면이랑 같아졌어</div>
+    <div class="cloud hidden-deco" id="gCloud1"></div>
+    <div class="cloud hidden-deco" id="gCloud2"></div>
+    <div class="hidden-deco" id="gSun"></div>
+
+    <div id="gTower" style="display:none">
+      <div class="stack"></div>
+      <div class="final">
+        <div class="ct-roof"></div>
+        <div class="ct-house"><div class="ct-hole"></div></div>
+        <div class="ct-platform high"></div>
+        <div class="ct-platform mid"></div>
+        <div class="ct-platform low"></div>
+        <div class="ct-post left"></div>
+        <div class="ct-post right"></div>
+        <div class="ct-string"></div>
+        <div class="ct-ball"></div>
+        <div class="ct-base"></div>
+      </div>
+      <div class="clickLabel">0/50</div>
+      <button id="huntBtn" type="button">새 잡으러 가기</button>
+    </div>
+
+    <div id="gHide" style="display:none">
+      <div class="stack"></div>
+      <div class="final">
+        <div class="hh-hood"></div><div class="hh-body"></div><div class="hh-door"></div><div class="hh-cushion"></div>
+      </div>
+      <div class="clickLabel">0/20</div>
+    </div>
+
+    <div id="gScratch" style="display:none">
+      <div class="stack"></div>
+      <div class="final">
+        <div class="sc-toy"></div><div class="sc-top"></div><div class="sc-post"></div><div class="sc-base"></div>
+      </div>
+      <div class="clickLabel">0/20</div>
+    </div>
+
+    <div id="gLitter" style="display:none">
+      <div class="stack"></div>
+      <div class="final">
+        <div class="lh-handle"></div><div class="lh-lid"></div><div class="lh-box"></div><div class="lh-door"></div>
+      </div>
+      <div class="clickLabel">0/15</div>
+    </div>
+
+    <div id="gFood" class="bowl hidden-deco"></div>
+    <div id="gWater" class="bowl hidden-deco"></div>
+    <div id="gYarn" class="hidden-deco"></div>
+    <div class="bush hidden-deco" id="gBush1" style="left:200px"></div>
+    <div class="bush hidden-deco" id="gBush2" style="right:170px"></div>
+    <div class="flower hidden-deco" id="gFlower1" style="left:250px"><div class="petal"></div><div class="center"></div></div>
+
+    <div id="gameCat">
+      <div class="cat-tail"></div>
+      <div class="cat-ear left"></div><div class="cat-ear right"></div>
+      <div class="cat-ear-in left"></div><div class="cat-ear-in right"></div>
+      <div class="cat-body"></div><div class="cat-stripe"></div><div class="cat-head"></div>
+      <div class="cat-eye left"></div><div class="cat-eye right"></div><div class="cat-nose"></div>
+    </div>
+    <div id="gameGrass"></div>
+  </div>
+
+  <div id="huntScreen">
+    <div id="huntHud">
+      <span id="huntMiss">놓친 새: 0/5</span>
+      <button id="backYard" type="button">마당으로</button>
+    </div>
+    <div id="huntScoreCenter">0</div>
+    <div id="huntStartWrap" class="show">
+      <button id="huntStartBtn" type="button">게임 시작</button>
+    </div>
+    <div id="huntEndWrap">
+      <div id="huntEndBox">
+        <p id="huntEndText">게임 끝!</p>
+        <p id="huntEndScore">점수: 0</p>
+        <button id="huntRetryBtn" type="button">다시 하기</button>
+      </div>
+    </div>
+    <div id="huntRecord">최고 기록: 0</div>
+    <div class="hunt-cloud" style="left:80px;top:90px;width:140px;height:40px"></div>
+    <div class="hunt-cloud" style="right:120px;top:140px;width:110px;height:34px"></div>
+    <div class="hunt-cloud" style="left:42%;top:60px;width:120px;height:36px"></div>
+    <div id="huntCat">
+      <div class="hc-tail"></div>
+      <div class="hc-ear l"></div>
+      <div class="hc-ear r"></div>
+      <div class="hc-ear-in l"></div>
+      <div class="hc-ear-in r"></div>
+      <div class="hc-body"></div>
+      <div class="hc-stripe"></div>
+      <div class="hc-head"></div>
+      <div class="hc-paw left" id="leftPaw">
+        <div class="paw-claw c1"></div>
+        <div class="paw-claw c2"></div>
+        <div class="paw-claw c3"></div>
+        <div class="paw-claw c4"></div>
+        <div class="paw-toe t1"></div>
+        <div class="paw-toe t2"></div>
+        <div class="paw-toe t3"></div>
+        <div class="paw-toe t4"></div>
+        <div class="paw-pad"></div>
+        <div class="paw-bean"></div>
+      </div>
+      <div class="hc-paw right" id="rightPaw">
+        <div class="paw-claw c1"></div>
+        <div class="paw-claw c2"></div>
+        <div class="paw-claw c3"></div>
+        <div class="paw-claw c4"></div>
+        <div class="paw-toe t1"></div>
+        <div class="paw-toe t2"></div>
+        <div class="paw-toe t3"></div>
+        <div class="paw-toe t4"></div>
+        <div class="paw-pad"></div>
+        <div class="paw-bean"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  var cheap = "#BCAAA4";
+  var dash = "3px dashed #6D4C41";
+  var solid = "3px solid #6D4C41";
+  var sisal = "repeating-linear-gradient(180deg,#C4A574 0 10px,#B0895A 10px 14px)";
+  var sisalH = "repeating-linear-gradient(90deg,#D7B899 0 6px,#B08968 6px 8px)";
+
+  function layer(css) { return css; }
+
+  var plans = { tower: [], hide: [], scratch: [], litter: [] };
+
+  plans.tower.push(layer("left:70px;bottom:0;width:70px;height:14px;background:#8D6E63;border:" + dash + ";border-radius:6px"));
+  plans.tower.push(layer("left:40px;bottom:0;width:140px;height:20px;background:#A1887F;border:" + dash + ";border-radius:6px"));
+  plans.tower.push(layer("left:16px;bottom:0;width:280px;height:36px;background:#A1887F;border:4px solid #5D4037;border-radius:10px"));
+
+  for (var i = 0; i < 22; i++) {
+    var btm = 36 + i * 22;
+    var bg = i < 5 ? cheap : sisal;
+    var bd = i < 5 ? dash : solid;
+    plans.tower.push(layer("left:62px;bottom:" + btm + "px;width:28px;height:22px;background:" + bg + ";border:" + bd));
+  }
+
+  plans.tower.push(layer("left:20px;bottom:120px;width:160px;height:14px;background:" + cheap + ";border:" + dash + ";border-radius:8px"));
+  plans.tower.push(layer("left:12px;bottom:118px;width:290px;height:22px;background:#E8D5B5;border:4px solid #6D4C41;border-radius:12px"));
+
+  for (var j = 0; j < 12; j++) {
+    var rb = 36 + j * 22;
+    var rbg = j < 4 ? cheap : sisal;
+    var rbd = j < 4 ? dash : solid;
+    plans.tower.push(layer("left:230px;bottom:" + rb + "px;width:28px;height:22px;background:" + rbg + ";border:" + rbd));
+  }
+
+  plans.tower.push(layer("left:8px;bottom:278px;width:150px;height:14px;background:" + cheap + ";border:" + dash + ";border-radius:8px"));
+  plans.tower.push(layer("left:0;bottom:276px;width:210px;height:22px;background:#E8D5B5;border:4px solid #6D4C41;border-radius:12px"));
+  plans.tower.push(layer("left:90px;bottom:450px;width:150px;height:14px;background:" + cheap + ";border:" + dash + ";border-radius:8px"));
+  plans.tower.push(layer("left:70px;bottom:448px;width:230px;height:22px;background:#E8D5B5;border:4px solid #6D4C41;border-radius:12px"));
+  plans.tower.push(layer("left:110px;bottom:470px;width:100px;height:50px;background:#D7CCC8;border:" + dash));
+  plans.tower.push(layer("left:88px;bottom:470px;width:170px;height:110px;background:#D7CCC8;border:4px solid #5D4037;border-radius:8px"));
+  plans.tower.push(layer("left:136px;bottom:488px;width:70px;height:70px;background:#4E342E;border:4px solid #3E2723;border-radius:50%"));
+  plans.tower.push(layer("left:74px;bottom:580px;border-left:80px solid transparent;border-right:80px solid transparent;border-bottom:36px solid #A1887F"));
+  plans.tower.push(layer("left:74px;bottom:598px;border-left:100px solid transparent;border-right:100px solid transparent;border-bottom:58px solid #8D6E63"));
+  plans.tower.push(layer("left:30px;bottom:328px;width:4px;height:36px;background:#000"));
+  plans.tower.push(layer("left:18px;bottom:300px;width:28px;height:28px;background:#FFC107;border:4px solid #000;border-radius:50%"));
+
+  plans.hide.push(layer("left:70px;bottom:0;width:50px;height:30px;background:" + cheap + ";border:" + dash));
+  plans.hide.push(layer("left:50px;bottom:0;width:80px;height:44px;background:" + cheap + ";border:" + dash + ";border-radius:8px"));
+  plans.hide.push(layer("left:30px;bottom:0;width:120px;height:64px;background:#E0C090;border:" + solid + ";border-radius:16px 16px 8px 8px"));
+  plans.hide.push(layer("left:16px;bottom:0;width:160px;height:88px;background:#F5E6C8;border:" + solid + ";border-radius:28px 28px 10px 10px"));
+  plans.hide.push(layer("left:10px;bottom:0;width:190px;height:120px;background:#F5E6C8;border:4px solid #6D4C41;border-radius:90px 90px 18px 18px"));
+  plans.hide.push(layer("left:40px;bottom:88px;width:80px;height:20px;background:#E0C090;border:" + dash + ";border-bottom:none;border-radius:20px 20px 0 0"));
+  plans.hide.push(layer("left:30px;bottom:88px;width:120px;height:36px;background:#E0C090;border:" + solid + ";border-bottom:none;border-radius:40px 40px 0 0"));
+  plans.hide.push(layer("left:22px;bottom:88px;width:166px;height:70px;background:#E0C090;border:4px solid #6D4C41;border-bottom:none;border-radius:90px 90px 0 0"));
+  plans.hide.push(layer("left:84px;bottom:10px;width:28px;height:28px;background:#4E342E;border-radius:50%"));
+  plans.hide.push(layer("left:72px;bottom:10px;width:50px;height:50px;background:#4E342E;border:3px solid #3E2723;border-radius:50%"));
+  plans.hide.push(layer("left:62px;bottom:8px;width:86px;height:86px;background:#4E342E;border:4px solid #3E2723;border-radius:50%"));
+  plans.hide.push(layer("left:60px;bottom:4px;width:70px;height:10px;background:#FFCC80;border:2px solid #EF6C00;border-radius:8px"));
+  plans.hide.push(layer("left:40px;bottom:4px;width:130px;height:16px;background:#FFCC80;border:3px solid #EF6C00;border-radius:10px"));
+  plans.hide.push(layer("left:18px;bottom:4px;width:20px;height:20px;background:#E0C090;border:" + solid + ";border-radius:50%"));
+  plans.hide.push(layer("left:170px;bottom:4px;width:20px;height:20px;background:#E0C090;border:" + solid + ";border-radius:50%"));
+  plans.hide.push(layer("left:24px;bottom:100px;width:18px;height:10px;background:#6D4C41;border-radius:4px"));
+  plans.hide.push(layer("left:10px;bottom:0;width:190px;height:24px;background:#E8D5B5;border:3px solid #6D4C41;border-radius:0 0 12px 12px"));
+  plans.hide.push(layer("left:22px;bottom:88px;width:166px;height:18px;background:#D7B899;border:3px solid #6D4C41;border-radius:12px 12px 0 0"));
+  plans.hide.push(layer("left:62px;bottom:8px;width:86px;height:10px;background:#3E2723;border-radius:0 0 8px 8px"));
+  plans.hide.push(layer("left:88px;bottom:36px;width:34px;height:8px;background:#FFCC80;border-radius:4px"));
+
+  plans.scratch.push(layer("left:55px;bottom:0;width:40px;height:12px;background:#8D6E63;border:" + dash + ";border-radius:6px"));
+  plans.scratch.push(layer("left:24px;bottom:0;width:100px;height:18px;background:#A1887F;border:" + solid + ";border-radius:8px"));
+  plans.scratch.push(layer("left:10px;bottom:0;width:140px;height:28px;background:#A1887F;border:4px solid #5D4037;border-radius:10px"));
+  for (var s = 0; s < 13; s++) {
+    var sb = 28 + s * 15;
+    var sbg = s < 4 ? cheap : sisalH;
+    var sbd = s < 4 ? dash : "4px solid #6D4C41";
+    plans.scratch.push(layer("left:62px;bottom:" + sb + "px;width:36px;height:15px;background:" + sbg + ";border:" + sbd));
+  }
+  plans.scratch.push(layer("left:40px;bottom:222px;width:70px;height:12px;background:" + cheap + ";border:" + dash));
+  plans.scratch.push(layer("left:28px;bottom:226px;width:104px;height:22px;background:#E8D5B5;border:4px solid #6D4C41;border-radius:10px"));
+  plans.scratch.push(layer("left:70px;bottom:248px;width:14px;height:14px;background:#EF9A9A;border:2px solid #000;border-radius:50%"));
+  plans.scratch.push(layer("left:66px;bottom:250px;width:22px;height:22px;background:#FF5252;border:3px solid #000;border-radius:50%"));
+
+  plans.litter.push(layer("left:55px;bottom:0;width:60px;height:14px;background:#90A4AE;border:3px dashed #455A64"));
+  plans.litter.push(layer("left:30px;bottom:0;width:110px;height:24px;background:#90A4AE;border:3px solid #455A64"));
+  plans.litter.push(layer("left:16px;bottom:0;width:140px;height:42px;background:#B0BEC5;border:3px solid #455A64;border-radius:8px"));
+  plans.litter.push(layer("left:8px;bottom:0;width:164px;height:70px;background:#B0BEC5;border:4px solid #455A64;border-radius:12px"));
+  plans.litter.push(layer("left:14px;bottom:8px;width:152px;height:12px;background:#ECEFF1;border-radius:6px"));
+  plans.litter.push(layer("left:40px;bottom:62px;width:90px;height:16px;background:#90A4AE;border:3px dashed #455A64;border-radius:8px 8px 0 0"));
+  plans.litter.push(layer("left:20px;bottom:62px;width:130px;height:32px;background:#90A4AE;border:3px solid #455A64;border-bottom:none;border-radius:12px 12px 0 0"));
+  plans.litter.push(layer("left:8px;bottom:62px;width:164px;height:58px;background:#90A4AE;border:4px solid #455A64;border-bottom:none;border-radius:18px 18px 8px 8px"));
+  plans.litter.push(layer("left:76px;bottom:10px;width:28px;height:28px;background:#37474F;border-radius:8px"));
+  plans.litter.push(layer("left:64px;bottom:8px;width:52px;height:52px;background:#37474F;border:3px solid #263238;border-radius:12px"));
+  plans.litter.push(layer("left:52px;bottom:8px;width:76px;height:76px;background:#37474F;border:4px solid #263238;border-radius:16px 16px 8px 8px"));
+  plans.litter.push(layer("left:80px;bottom:100px;width:20px;height:8px;background:#546E7A;border:2px solid #37474F"));
+  plans.litter.push(layer("left:72px;bottom:108px;width:36px;height:10px;background:#546E7A;border:3px solid #37474F;border-radius:8px"));
+  plans.litter.push(layer("left:18px;bottom:16px;width:18px;height:8px;background:#78909C;border-radius:4px"));
+  plans.litter.push(layer("left:144px;bottom:16px;width:18px;height:8px;background:#78909C;border-radius:4px"));
+
+  var items = {
+    tower: { id: "gTower", clicks: 0, max: plans.tower.length, placed: false },
+    hide: { id: "gHide", clicks: 0, max: plans.hide.length, placed: false },
+    scratch: { id: "gScratch", clicks: 0, max: plans.scratch.length, placed: false },
+    litter: { id: "gLitter", clicks: 0, max: plans.litter.length, placed: false }
+  };
+
+  for (var key in items) {
+    document.querySelector("#" + items[key].id + " .clickLabel").textContent = "0/" + items[key].max;
+  }
+
+  function addPiece(name) {
+    var data = items[name];
+    var list = plans[name];
+    if (data.clicks >= data.max) return;
+    var index = data.clicks;
+    if (index >= list.length) return;
+    var stack = document.querySelector("#" + data.id + " .stack");
+    var d = document.createElement("div");
+    d.className = "piece";
+    d.style.cssText = list[index];
+    stack.appendChild(d);
+    data.clicks += 1;
+    document.querySelector("#" + data.id + " .clickLabel").textContent = data.clicks + "/" + data.max;
+    if (data.clicks >= data.max) {
+      document.getElementById(data.id).classList.add("final-on");
+    }
+    checkDone();
+  }
+
+  function checkDone() {
+    var all = true, total = 0;
+    for (var k in items) {
+      total += items[k].clicks;
+      if (!items[k].placed || items[k].clicks < items[k].max) all = false;
+    }
+    if (total >= 20) {
+      ["gSun", "gCloud1", "gCloud2", "gFlower1"].forEach(function(id) {
+        document.getElementById(id).classList.remove("hidden-deco");
+      });
+    }
+    if (total >= 40) {
+      ["gFood", "gWater", "gYarn", "gBush1", "gBush2"].forEach(function(id) {
+        document.getElementById(id).classList.remove("hidden-deco");
+      });
+    }
+    if (all) {
+      document.getElementById("doneMsg").style.display = "block";
+      document.getElementById("hintText").textContent = "전부 좋은 물건이 됐어!";
+      document.getElementById("huntBtn").style.display = "block";
+    }
+  }
+
+  var huntOn = false;
+  var huntReady = false;
+  var huntScore = 0;
+  var huntMiss = 0;
+  var huntTimer = null;
+  var huntMove = null;
+  var huntSpeedTimer = null;
+  var huntSpeedMul = 1;
+  var pawReset = null;
+  var huntBest = 0;
+  try { huntBest = parseInt(localStorage.getItem("catHuntBest") || "0", 10) || 0; } catch (e) {}
+
+  function showHuntRecord() {
+    document.getElementById("huntRecord").textContent = "최고 기록: " + huntBest;
+  }
+  showHuntRecord();
+
+  function gullHtml() {
+    return '<div class="gull-wing"></div><div class="gull-body"></div><div class="gull-head"></div><div class="gull-beak"></div>';
+  }
+
+  function spawnGull() {
+    if (!huntOn) return;
+    var g = document.createElement("div");
+    g.className = "gull";
+    g.innerHTML = gullHtml();
+    var fromLeft = Math.random() > 0.5;
+    g.style.top = (70 + Math.random() * 280) + "px";
+    if (fromLeft) {
+      g.style.left = "-80px";
+      g.dataset.dir = "1";
+    } else {
+      g.style.left = (window.innerWidth + 20) + "px";
+      g.dataset.dir = "-1";
+      g.classList.add("flip");
+    }
+    g.dataset.speed = String(6.5 + Math.random() * 4.5);
+    document.getElementById("huntScreen").appendChild(g);
+  }
+
+  function moveGulls() {
+    if (!huntOn) return;
+    var list = document.querySelectorAll("#huntScreen .gull");
+    list.forEach(function(g) {
+      if (g.classList.contains("fall")) return;
+      var x = parseFloat(g.style.left) || 0;
+      var dir = parseFloat(g.dataset.dir);
+      var speed = parseFloat(g.dataset.speed);
+      x += dir * speed * huntSpeedMul;
+      g.style.left = x + "px";
+      if (x > window.innerWidth + 100 || x < -120) {
+        g.remove();
+        if (huntOn) {
+          huntMiss += 1;
+          document.getElementById("huntMiss").textContent = "놓친 새: " + huntMiss + "/5";
+          if (huntMiss >= 5) endHuntRound();
+        }
+      }
+    });
+  }
+
+  function nyanPunch(x) {
+    var rect = document.getElementById("huntScreen").getBoundingClientRect();
+    var paw = (x < rect.left + rect.width / 2)
+      ? document.getElementById("leftPaw")
+      : document.getElementById("rightPaw");
+    paw.classList.remove("punch");
+    void paw.offsetWidth;
+    paw.classList.add("punch");
+    clearTimeout(pawReset);
+    pawReset = setTimeout(function() {
+      paw.classList.remove("punch");
+    }, 280);
+  }
+
+  function catchNearestGull(x, y) {
+    var list = document.querySelectorAll("#huntScreen .gull");
+    var best = null;
+    var bestDist = 9999;
+    for (var i = 0; i < list.length; i++) {
+      var g = list[i];
+      if (g.classList.contains("fall")) continue;
+      var r = g.getBoundingClientRect();
+      var cx = r.left + r.width / 2;
+      var cy = r.top + r.height / 2;
+      var dx = x - cx;
+      var dy = y - cy;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = g;
+      }
+    }
+    if (best && bestDist <= 55) {
+      best.classList.add("fall");
+      huntScore += 100;
+      document.getElementById("huntScoreCenter").textContent = huntScore;
+      setTimeout(function() { if (best.parentNode) best.remove(); }, 750);
+    }
+  }
+
+  function openHuntScreen() {
+    huntOn = false;
+    huntReady = false;
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("huntScreen").style.display = "block";
+    document.getElementById("huntStartWrap").classList.add("show");
+    document.getElementById("huntEndWrap").classList.remove("show");
+    document.querySelectorAll("#huntScreen .gull").forEach(function(g) { g.remove(); });
+    document.getElementById("huntScoreCenter").textContent = "0";
+    document.getElementById("huntMiss").textContent = "놓친 새: 0/5";
+    showHuntRecord();
+    clearInterval(huntTimer);
+    clearInterval(huntMove);
+    clearInterval(huntSpeedTimer);
+  }
+
+  function startHuntRound() {
+    huntOn = true;
+    huntReady = true;
+    huntScore = 0;
+    huntMiss = 0;
+    document.getElementById("huntScoreCenter").textContent = "0";
+    document.getElementById("huntMiss").textContent = "놓친 새: 0/5";
+    document.getElementById("huntStartWrap").classList.remove("show");
+    document.getElementById("huntEndWrap").classList.remove("show");
+    document.querySelectorAll("#huntScreen .gull").forEach(function(g) { g.remove(); });
+    huntSpeedMul = 1;
+    spawnGull();
+    spawnGull();
+    clearInterval(huntTimer);
+    clearInterval(huntMove);
+    clearInterval(huntSpeedTimer);
+    huntTimer = setInterval(spawnGull, 700);
+    huntMove = setInterval(moveGulls, 16);
+    huntSpeedTimer = setInterval(function() {
+      huntSpeedMul += 0.25;
+    }, 2500);
+  }
+
+  function endHuntRound() {
+    if (!huntOn) return;
+    huntOn = false;
+    clearInterval(huntTimer);
+    clearInterval(huntMove);
+    clearInterval(huntSpeedTimer);
+    document.querySelectorAll("#huntScreen .gull").forEach(function(g) { g.remove(); });
+    var text = "게임 끝!";
+    if (huntScore > huntBest) {
+      huntBest = huntScore;
+      try { localStorage.setItem("catHuntBest", String(huntBest)); } catch (e) {}
+      text = "신기록!";
+    }
+    showHuntRecord();
+    document.getElementById("huntEndText").textContent = text;
+    document.getElementById("huntEndScore").textContent = "이번 점수: " + huntScore;
+    document.getElementById("huntEndWrap").classList.add("show");
+  }
+
+  function stopHunt() {
+    huntOn = false;
+    clearInterval(huntTimer);
+    clearInterval(huntMove);
+    clearInterval(huntSpeedTimer);
+    document.querySelectorAll("#huntScreen .gull").forEach(function(g) { g.remove(); });
+    document.getElementById("huntScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+    document.getElementById("doneMsg").style.display = "none";
+  }
+
+  document.getElementById("huntBtn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    openHuntScreen();
+  });
+
+  document.getElementById("huntStartBtn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    startHuntRound();
+  });
+
+  document.getElementById("huntRetryBtn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    document.getElementById("huntEndWrap").classList.remove("show");
+    document.getElementById("huntStartWrap").classList.add("show");
+  });
+
+  document.getElementById("backYard").addEventListener("click", function(e) {
+    e.stopPropagation();
+    stopHunt();
+  });
+
+  document.getElementById("huntScreen").addEventListener("mousedown", function(e) {
+    if (!huntOn) return;
+    if (e.target.closest("#huntHud")) return;
+    e.preventDefault();
+    nyanPunch(e.clientX);
+    catchNearestGull(e.clientX, e.clientY);
+  });
+
+  document.querySelectorAll("#shopBar button").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var name = btn.getAttribute("data-place");
+      var data = items[name];
+      if (data.placed) return;
+      data.placed = true;
+      document.getElementById(data.id).style.display = "block";
+      addPiece(name);
+      btn.disabled = true;
+      btn.textContent = "놓음!";
+    });
+  });
+
+  ["tower", "hide", "scratch", "litter"].forEach(function(name) {
+    document.getElementById(items[name].id).addEventListener("click", function() {
+      addPiece(name);
+    });
+  });
+
+  document.getElementById("startText").addEventListener("click", function() {
+    var startScreen = document.getElementById("startScreen");
+    startScreen.classList.add("fade-out");
+    setTimeout(function() {
+      startScreen.style.display = "none";
+      document.getElementById("gameScreen").style.display = "block";
+    }, 1000);
+  });
+</script>
+</body>
+</html>
